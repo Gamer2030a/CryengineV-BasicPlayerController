@@ -12,6 +12,9 @@
 #include <DefaultComponents/Input/InputComponent.h>
 #include <DefaultComponents/Physics/CharacterControllerComponent.h>
 #include <DefaultComponents/Geometry/AdvancedAnimationComponent.h>
+#include <DefaultComponents/Lights/ProjectorLightComponent.h>
+#include <Msplog.h>
+
 
 namespace
 {
@@ -33,6 +36,7 @@ void CPlayerComponent::Initialize()
     m_pInputComponent = m_pEntity->GetOrCreateComponent<Cry::DefaultComponents::CInputComponent>();
     m_pCharacterController = m_pEntity->GetOrCreateComponent<Cry::DefaultComponents::CCharacterControllerComponent>();
     m_pAdvancedAnimationComponent = m_pEntity->GetOrCreateComponent<Cry::DefaultComponents::CAdvancedAnimationComponent>();
+    m_pProjectorLightComponent = m_pEntity->GetOrCreateComponent<Cry::DefaultComponents::CProjectorLightComponent>();
 
 }
 
@@ -133,15 +137,67 @@ void CPlayerComponent::InitializeInput()
 
     m_pInputComponent->RegisterAction("player", "flashlight", [this](int activationMode, float value) 
         {
+                //CryLog("IfStatementIsTriggered");
+            /*
+            if (m_pProjectorLightComponent->IsEnabled() == true)
+            {
+                m_pProjectorLightComponent->Enable(false);
+                CryLog("LightEnabled");
+            }
+            else
+            {
+                CryLog("LightDisabled");
+            }
+            */
+            if (m_flashLightOn == true)
+            {
+                m_CurrentFlashlightState = EFlashlightState::Off;
+            }
+            else
+            {
+                m_CurrentFlashlightState = EFlashlightState::On;
+            }
+            Matrix34 lightDefaultMatrix;
+            switch (m_CurrentFlashlightState)
+            {
+            case EFlashlightState::On:
+                m_pProjectorLightComponent->Enable(true);
+                m_flashLightOn = true;
+                lightDefaultMatrix.SetTranslation(m_cameraDefaultPos);
+                lightDefaultMatrix.SetRotation33(Matrix33(m_pEntity->GetWorldRotation()));
+                m_pProjectorLightComponent->SetTransformMatrix(lightDefaultMatrix);
+                break;
+            case EFlashlightState::Off:
+                m_pProjectorLightComponent->Enable(false);
+                m_flashLightOn = false;
+                break;
+            case EFlashlightState::Flickering:
+                break;
+            case EFlashlightState::OutOfBattery:
+                break;
+            }
+            /*
+            switch (m_pProjectorLightComponent->IsEnabled())
+            {
+            case true:
+                m_pProjectorLightComponent->Enable(false);
+                break;
+
+            case false:
+                m_pProjectorLightComponent->Enable(true);
+                break; 
+            }
+            */
         });
-    m_pInputComponent->BindAction("player", "flashlight", eAID_KeyboardMouse, eKI_F);
+    m_pInputComponent->BindAction("player", "flashlight", eAID_KeyboardMouse, eKI_F, false, true, false);
 
     m_pInputComponent->RegisterAction("player", "jump", [this](int activationMode, float value) 
         {
             if (m_pCharacterController->IsOnGround() == true)
             {
                 m_CurrentPlayerState = EPlayerState::Jumping;
-                m_pCharacterController->ChangeVelocity(m_jumpVelocity, Cry::DefaultComponents::CCharacterControllerComponent::EChangeVelocityMode::Add);
+                m_pCharacterController->AddVelocity(Vec3(0.0f,0.0f,m_jumpHeight));
+                CryLog("Why did you jump?");
             }
         });
     m_pInputComponent->BindAction("player", "jump", eAID_KeyboardMouse, eKI_Space);

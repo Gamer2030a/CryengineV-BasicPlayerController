@@ -8,6 +8,7 @@ namespace Cry::DefaultComponents
     class CInputComponent;
     class CCharacterControllerComponent;
     class CAdvancedAnimationComponent;
+    class CProjectorLightComponent; //might not be needed
 }
 
 enum class EPlayerState
@@ -19,6 +20,15 @@ enum class EPlayerState
     Sliding,
     Jumping
 };
+
+enum class EFlashlightState
+{
+    On,
+    Off,
+    Flickering,
+    OutOfBattery
+};
+
 
 ////////////////////////////////////////////////////////
 // Represents a player participating in gameplay
@@ -43,7 +53,7 @@ public:
         desc.AddMember(&CPlayerComponent::m_walkSpeed, 'pws', "playerwalkSpeed", "Player WalkSpeed", "Sets the Player Walk speed", ZERO);
         desc.AddMember(&CPlayerComponent::m_runSpeed, 'prs', "playerrunSpeed", "Player RunSpeed", "Sets the Player Run speed", ZERO);
         desc.AddMember(&CPlayerComponent::m_slideSpeed, 'pss', "playerslideSpeed", "Player SlideSpeed", "Sets the Player Slide speed", ZERO);
-        desc.AddMember(&CPlayerComponent::m_jumpVelocity, 'pjv', "playerjumpVelocity", "Player JumpVelocity", "Sets the Player jump velocity", ZERO);
+        desc.AddMember(&CPlayerComponent::m_jumpHeight, 'pjh', "playerjumpHeight", "Player JumpHeight", "Sets the Player jump Height", ZERO);
         desc.AddMember(&CPlayerComponent::m_rotationSpeed, 'pros', "playerrotationspeed", "Player RotationSpeed", "Sets the Player rotation speed", ZERO);
         desc.AddMember(&CPlayerComponent::m_cameraDefaultPos, 'pcp', "playercameraposition", "Player cameraPosition", "Sets the Player camera position", ZERO);
         desc.AddMember(&CPlayerComponent::m_cameraDefaultCrouchPos, 'pccp', "playercrouchcameraposition", "Player crouch cameraPosition", "Sets the Player Crouch camera position", ZERO);
@@ -59,6 +69,7 @@ private:
     Cry::DefaultComponents::CInputComponent* m_pInputComponent;
     Cry::DefaultComponents::CCharacterControllerComponent* m_pCharacterController;
     Cry::DefaultComponents::CAdvancedAnimationComponent* m_pAdvancedAnimationComponent;
+    Cry::DefaultComponents::CProjectorLightComponent* m_pProjectorLightComponent;
 
     void InitializeInput();
     void PlayerMovment();
@@ -68,11 +79,11 @@ private:
     Vec3 m_cameraDefaultPos;
     Vec3 m_cameraDefaultCrouchPos;
     Vec3 m_cameraCurrentPos = m_cameraDefaultPos;
-    Vec3 m_jumpVelocity;
 
     Vec2 m_movementDelta;
     Vec2 m_mouseDeltaRotation;
 
+    float m_jumpHeight;
     float m_movementSpeed;
     float m_rotationSpeed;
     float m_walkSpeed;
@@ -84,6 +95,9 @@ private:
 
     float m_rotationLimitMinPitch;
     float m_rotationLimitMaxPitch;
+
+    bool m_flashLightOn = true;
 };
 
 EPlayerState m_CurrentPlayerState;
+EFlashlightState m_CurrentFlashlightState;
